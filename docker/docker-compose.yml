@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+
+    mongo_setup:
+        image: mongo:6.0.1
+        hostname: mongo_setup1
+        container_name: mongo_setup1
+        volumes: 
+            - ./config:/rs_config
+        entrypoint: /usr/bin/bash /rs_config/config.sh
+        restart: "no"
+        networks:
+            - mongo_net
+        depends_on:
+            - mongo11
+            - mongo22
+            - mongo33
+
+    mongo11:
+        image: mongo:6.0.1
+        hostname: mongo11
+        container_name: mongo11
+        entrypoint: /usr/bin/mongod --port 27117 --replSet "rs00" --bind_ip_all
+        ports: 
+            - 27117:27117
+        networks:
+            - mongo_net
+        restart: on-failure
+
+    mongo22:
+        image: mongo:6.0.1
+        hostname: mongo22
+        container_name: mongo22
+        entrypoint: /usr/bin/mongod --port 27217 --replSet "rs00" --bind_ip_all
+        ports: 
+            - 27217:27217
+        networks:
+            - mongo_net
+        restart: on-failure
+        
+    mongo33:
+        image: mongo:6.0.1
+        hostname: mongo33
+        container_name: mongo33
+        environment: 
+            - RS_NAME=rs00
+        entrypoint: /usr/bin/mongod --port 27317 --replSet "rs00" --bind_ip_all
+        ports: 
+            - 27317:27317
+        networks:
+            - mongo_net
+        restart: on-failure
+
+
+networks:
+    mongo_net:
